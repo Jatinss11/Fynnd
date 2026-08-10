@@ -7,17 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatLPA(amount?: number | null) {
   if (!amount) return '—';
-  return `₹${amount} LPA`;
+  return `$${amount}K`;
 }
 
 export function formatDate(date?: string | Date | null) {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export function formatDateTime(date?: string | Date | null) {
   if (!date) return '—';
-  return new Date(date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(date).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 export function getInitials(name?: string) {
@@ -25,15 +25,20 @@ export function getInitials(name?: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-export const INDIAN_CITIES = [
-  'Bengaluru', 'Mumbai', 'Delhi', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata',
-  'Ahmedabad', 'Gurugram', 'Noida', 'Jaipur', 'Chandigarh', 'Kochi', 'Indore',
+export const CITIES = [
+  'New York', 'San Francisco', 'London', 'Toronto', 'Sydney', 'Singapore',
+  'Dubai', 'Berlin', 'Amsterdam', 'Austin', 'Chicago', 'Los Angeles',
+  'Seattle', 'Boston', 'Remote',
 ];
 
-export const INDIAN_STATES = [
-  'Karnataka', 'Maharashtra', 'Delhi', 'Telangana', 'Tamil Nadu', 'Gujarat',
-  'Haryana', 'Uttar Pradesh', 'Rajasthan', 'Punjab', 'Kerala', 'Madhya Pradesh',
+export const REGIONS = [
+  'North America', 'Europe', 'Asia Pacific', 'Middle East', 'Latin America',
+  'Africa', 'Remote / Global',
 ];
+
+// Keep legacy exports for backward compatibility
+export const INDIAN_CITIES = CITIES;
+export const INDIAN_STATES = REGIONS;
 
 export const INDUSTRIES = [
   'Fintech', 'Food Tech', 'E-commerce', 'SaaS', 'EdTech', 'HealthTech',

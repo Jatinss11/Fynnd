@@ -15,120 +15,120 @@ async function seed() {
 
   // Create admin
   const admin = await User.create({
-    name: 'Arjun Sharma', email: 'admin@fynnd.in', password: 'Admin@123',
-    role: 'admin', phone: '9876543210', city: 'Bengaluru', state: 'Karnataka',
+    name: 'Alex Morgan', email: 'admin@fynnd.com', password: 'Admin@123',
+    role: 'admin', phone: '+1-555-0100', city: 'San Francisco', state: 'California',
   });
 
   // Create recruiters
   const [r1, r2] = await User.create([
-    { name: 'Priya Nair', email: 'priya@fynnd.in', password: 'Test@123', role: 'recruiter', city: 'Mumbai', specializations: ['Tech', 'Product'] },
-    { name: 'Rahul Verma', email: 'rahul@fynnd.in', password: 'Test@123', role: 'recruiter', city: 'Bengaluru', specializations: ['Engineering', 'Data'] },
+    { name: 'Sarah Chen', email: 'recruiter@fynnd.com', password: 'Test@123', role: 'recruiter', city: 'New York', specializations: ['Tech', 'Product'] },
+    { name: 'James Okafor', email: 'james@fynnd.com', password: 'Test@123', role: 'recruiter', city: 'London', specializations: ['Engineering', 'Data'] },
   ]);
 
   // Create clients
   const [c1, c2, c3] = await User.create([
-    { name: 'Sneha Kapoor', email: 'sneha@zomato.com', password: 'Test@123', role: 'client', company: 'Zomato', industry: 'Food Tech', companySize: '1000+', city: 'Gurugram' },
-    { name: 'Vikram Singh', email: 'vikram@razorpay.com', password: 'Test@123', role: 'client', company: 'Razorpay', industry: 'Fintech', companySize: '500-1000', city: 'Bengaluru' },
-    { name: 'Ananya Reddy', email: 'ananya@meesho.com', password: 'Test@123', role: 'client', company: 'Meesho', industry: 'E-commerce', companySize: '1000+', city: 'Bengaluru' },
+    { name: 'Emily Carter', email: 'client@acme.com', password: 'Test@123', role: 'client', company: 'Acme Corp', industry: 'SaaS', companySize: '1000+', city: 'San Francisco' },
+    { name: 'David Park', email: 'david@techcorp.com', password: 'Test@123', role: 'client', company: 'TechCorp', industry: 'Fintech', companySize: '500-1000', city: 'New York' },
+    { name: 'Lena Müller', email: 'lena@globalretail.com', password: 'Test@123', role: 'client', company: 'Global Retail', industry: 'E-commerce', companySize: '1000+', city: 'Berlin' },
   ]);
 
   // Create candidates
   await Candidate.create([
     {
-      name: 'Aditya Kumar', email: 'aditya.kumar@gmail.com', phone: '9876501234',
-      location: 'Bengaluru', city: 'Bengaluru', state: 'Karnataka',
-      currentCompany: 'Infosys', currentRole: 'Senior Software Engineer',
+      name: 'Marcus Johnson', email: 'marcus.j@gmail.com', phone: '+1-555-0201',
+      location: 'San Francisco', city: 'San Francisco', state: 'California',
+      currentCompany: 'Stripe', currentRole: 'Senior Software Engineer',
       experienceYears: 5, skills: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
-      currentSalary: 18, expectedSalary: 25, noticePeriod: '30 days',
+      currentSalary: 140, expectedSalary: 170, noticePeriod: '30 days',
       willingToRelocate: true, source: 'manual', addedBy: r1._id,
-      education: [{ degree: 'B.Tech Computer Science', institution: 'NIT Trichy', year: 2019 }],
+      education: [{ degree: 'B.Sc Computer Science', institution: 'MIT', year: 2019 }],
     },
     {
-      name: 'Kavya Menon', email: 'kavya.menon@gmail.com', phone: '9876502345',
-      location: 'Mumbai', city: 'Mumbai', state: 'Maharashtra',
-      currentCompany: 'Flipkart', currentRole: 'Product Manager',
+      name: 'Priya Patel', email: 'priya.patel@gmail.com', phone: '+44-7700-900201',
+      location: 'London', city: 'London', state: 'England',
+      currentCompany: 'Shopify', currentRole: 'Product Manager',
       experienceYears: 4, skills: ['Product Management', 'Agile', 'SQL', 'Figma', 'Analytics'],
-      currentSalary: 22, expectedSalary: 30, noticePeriod: '45 days',
+      currentSalary: 95, expectedSalary: 120, noticePeriod: '45 days',
       willingToRelocate: false, source: 'linkedin', addedBy: r1._id,
-      education: [{ degree: 'MBA', institution: 'IIM Ahmedabad', year: 2020 }],
+      education: [{ degree: 'MBA', institution: 'London Business School', year: 2020 }],
     },
     {
-      name: 'Rohan Gupta', email: 'rohan.gupta@gmail.com', phone: '9876503456',
-      location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana',
-      currentCompany: 'TCS', currentRole: 'Data Scientist',
+      name: 'Carlos Rivera', email: 'carlos.r@gmail.com', phone: '+1-555-0203',
+      location: 'Austin', city: 'Austin', state: 'Texas',
+      currentCompany: 'Databricks', currentRole: 'Data Scientist',
       experienceYears: 3, skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL', 'Tableau'],
-      currentSalary: 12, expectedSalary: 18, noticePeriod: '60 days',
-      willingToRelocate: true, source: 'naukri', addedBy: r2._id,
-      education: [{ degree: 'M.Tech Data Science', institution: 'IIT Hyderabad', year: 2021 }],
+      currentSalary: 110, expectedSalary: 140, noticePeriod: '60 days',
+      willingToRelocate: true, source: 'portal', addedBy: r2._id,
+      education: [{ degree: 'M.Sc Data Science', institution: 'Stanford University', year: 2021 }],
     },
     {
-      name: 'Ishaan Patel', email: 'ishaan.patel@gmail.com', phone: '9876504567',
-      location: 'Pune', city: 'Pune', state: 'Maharashtra',
-      currentCompany: 'Wipro', currentRole: 'Backend Developer',
+      name: 'Aisha Osei', email: 'aisha.osei@gmail.com', phone: '+1-555-0204',
+      location: 'Toronto', city: 'Toronto', state: 'Ontario',
+      currentCompany: 'Atlassian', currentRole: 'Backend Engineer',
       experienceYears: 6, skills: ['Java', 'Spring Boot', 'Microservices', 'Kafka', 'Docker'],
-      currentSalary: 20, expectedSalary: 28, noticePeriod: '30 days',
+      currentSalary: 130, expectedSalary: 160, noticePeriod: '30 days',
       willingToRelocate: true, source: 'referral', addedBy: r2._id,
-      education: [{ degree: 'B.E. Computer Engineering', institution: 'COEP Pune', year: 2018 }],
+      education: [{ degree: 'B.Eng Software Engineering', institution: 'University of Toronto', year: 2018 }],
     },
     {
-      name: 'Divya Sharma', email: 'divya.sharma@gmail.com', phone: '9876505678',
-      location: 'Delhi', city: 'Delhi', state: 'Delhi',
-      currentCompany: 'Paytm', currentRole: 'Frontend Developer',
+      name: 'Tom Nguyen', email: 'tom.nguyen@gmail.com', phone: '+61-400-000205',
+      location: 'Sydney', city: 'Sydney', state: 'New South Wales',
+      currentCompany: 'Canva', currentRole: 'Frontend Developer',
       experienceYears: 2, skills: ['React', 'Vue.js', 'CSS', 'JavaScript', 'Figma'],
-      currentSalary: 8, expectedSalary: 12, noticePeriod: 'Immediate',
+      currentSalary: 85, expectedSalary: 105, noticePeriod: 'Immediate',
       willingToRelocate: true, source: 'portal', addedBy: r1._id,
-      education: [{ degree: 'B.Tech IT', institution: 'DTU Delhi', year: 2022 }],
+      education: [{ degree: 'B.Sc Information Technology', institution: 'UNSW Sydney', year: 2022 }],
     },
     {
-      name: 'Aryan Mehta', email: 'aryan.mehta@gmail.com', phone: '9876506789',
-      location: 'Bengaluru', city: 'Bengaluru', state: 'Karnataka',
-      currentCompany: 'Swiggy', currentRole: 'DevOps Engineer',
+      name: 'Nina Kovač', email: 'nina.kovac@gmail.com', phone: '+49-30-000206',
+      location: 'Berlin', city: 'Berlin', state: 'Berlin',
+      currentCompany: 'Zalando', currentRole: 'DevOps Engineer',
       experienceYears: 4, skills: ['Kubernetes', 'Docker', 'AWS', 'Terraform', 'CI/CD', 'Linux'],
-      currentSalary: 16, expectedSalary: 22, noticePeriod: '30 days',
+      currentSalary: 90, expectedSalary: 115, noticePeriod: '30 days',
       willingToRelocate: false, source: 'manual', addedBy: r2._id,
-      education: [{ degree: 'B.Tech ECE', institution: 'VIT Vellore', year: 2020 }],
+      education: [{ degree: 'B.Sc Computer Engineering', institution: 'TU Berlin', year: 2020 }],
     },
   ]);
 
   // Create jobs
   await Job.create([
     {
-      title: 'Senior Full Stack Engineer', company: 'Razorpay', clientId: c2._id, postedBy: r1._id,
-      location: 'Bengaluru', cities: ['Bengaluru', 'Mumbai'], remote: 'hybrid',
-      experienceMin: 4, experienceMax: 8, salaryMin: 20, salaryMax: 35,
+      title: 'Senior Full Stack Engineer', company: 'TechCorp', clientId: c2._id, postedBy: r1._id,
+      location: 'New York', cities: ['New York', 'Remote'], remote: 'hybrid',
+      experienceMin: 4, experienceMax: 8, salaryMin: 140, salaryMax: 200,
       skills: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
       industry: 'Fintech', department: 'Engineering', employmentType: 'Full-time',
       openings: 3, urgency: 'urgent', status: 'open',
-      description: 'Build and scale payment infrastructure used by millions of Indian businesses.',
+      description: 'Build and scale payment infrastructure used by millions of businesses worldwide.',
     },
     {
-      title: 'Product Manager - Growth', company: 'Zomato', clientId: c1._id, postedBy: r1._id,
-      location: 'Gurugram', cities: ['Gurugram', 'Bengaluru'], remote: 'onsite',
-      experienceMin: 3, experienceMax: 6, salaryMin: 25, salaryMax: 40,
+      title: 'Product Manager - Growth', company: 'Acme Corp', clientId: c1._id, postedBy: r1._id,
+      location: 'San Francisco', cities: ['San Francisco', 'Remote'], remote: 'hybrid',
+      experienceMin: 3, experienceMax: 6, salaryMin: 120, salaryMax: 160,
       skills: ['Product Management', 'Analytics', 'SQL', 'Agile'],
-      industry: 'Food Tech', department: 'Product', employmentType: 'Full-time',
+      industry: 'SaaS', department: 'Product', employmentType: 'Full-time',
       openings: 1, urgency: 'normal', status: 'open',
-      description: 'Drive growth initiatives for Zomato\'s core ordering platform.',
+      description: 'Drive growth initiatives for our core platform serving customers globally.',
     },
     {
-      title: 'Data Scientist - ML Platform', company: 'Meesho', clientId: c3._id, postedBy: r2._id,
-      location: 'Bengaluru', cities: ['Bengaluru'], remote: 'hybrid',
-      experienceMin: 2, experienceMax: 5, salaryMin: 15, salaryMax: 28,
+      title: 'Data Scientist - ML Platform', company: 'Global Retail', clientId: c3._id, postedBy: r2._id,
+      location: 'Berlin', cities: ['Berlin', 'Remote'], remote: 'hybrid',
+      experienceMin: 2, experienceMax: 5, salaryMin: 90, salaryMax: 130,
       skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL'],
       industry: 'E-commerce', department: 'Data Science', employmentType: 'Full-time',
       openings: 2, urgency: 'urgent', status: 'open',
-      description: 'Build recommendation and pricing ML models for 140M+ users.',
+      description: 'Build recommendation and pricing ML models for our global e-commerce platform.',
     },
   ]);
 
   console.log('✅ Seed complete!');
   console.log('\n📧 Login credentials:');
-  console.log('Admin:     admin@fynnd.in     / Admin@123');
-  console.log('Recruiter: priya@fynnd.in     / Test@123');
-  console.log('Recruiter: rahul@fynnd.in     / Test@123');
-  console.log('Client:    sneha@zomato.com   / Test@123');
-  console.log('Client:    vikram@razorpay.com / Test@123');
-  console.log('Client:    ananya@meesho.com  / Test@123');
+  console.log('Admin:     admin@fynnd.com      / Admin@123');
+  console.log('Recruiter: recruiter@fynnd.com  / Test@123');
+  console.log('Recruiter: james@fynnd.com      / Test@123');
+  console.log('Client:    client@acme.com      / Test@123');
+  console.log('Client:    david@techcorp.com   / Test@123');
+  console.log('Client:    lena@globalretail.com / Test@123');
 
   await mongoose.disconnect();
 }

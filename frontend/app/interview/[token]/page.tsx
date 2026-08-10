@@ -78,6 +78,7 @@ export default function InterviewRoomPage() {
 
   const submitAnswer = async () => {
     if (!answer.trim() || sending) return;
+    if (answer.trim().length < 5) return;
     const myAnswer = answer.trim();
     setAnswer('');
     setSending(true);
@@ -90,9 +91,9 @@ export default function InterviewRoomPage() {
         token, answer: myAnswer,
       });
 
-      // Add score feedback inline
+      // Record score
       if (data.evaluation?.score !== undefined) {
-        setScores(prev => [...prev, data.evaluation.score]);
+        setScores(prev => [...prev, Number(data.evaluation.score)]);
       }
 
       // Add AI response
@@ -104,8 +105,14 @@ export default function InterviewRoomPage() {
       }]);
 
       setProgress({ answered: data.answeredCount, total: data.totalQuestions });
-      if (data.isComplete) setStage('complete');
+
+      if (data.isComplete) {
+        setTimeout(() => setStage('complete'), 1500); // small delay so candidate reads closing message
+      }
     } catch (err: any) {
+      // Roll back the optimistic message on error
+      setMessages(prev => prev.slice(0, -1));
+      setAnswer(myAnswer); // restore answer so they can retry
       setMessages(prev => [...prev, {
         role: 'ai',
         content: err.response?.data?.message || 'Sorry, there was an issue processing your answer. Please try again.',
@@ -298,10 +305,13 @@ export default function InterviewRoomPage() {
               {m.role === 'ai' ? <Bot size={14} className="text-white" /> : (candidateName[0]?.toUpperCase() || 'C')}
             </div>
             <div className="max-w-[80%] space-y-1">
-              <div className={cn('px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line',
-                m.role === 'ai' ? 'bg-gray-800 text-gray-100' : 'bg-fynnd-600 text-white')}>
-                {m.content}
-              </div>
+              <div className={cn('px-4 py-3 rounded-2xl text-sm leading-relaxed',
+                m.role === 'ai' ? 'bg-gray-800 text-gray-100' : 'bg-fynnd-600 text-white')}
+                dangerouslySetInnerHTML={{
+                  __html: m.content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br/>')
+                }} />
               {/* Show score badge on AI messages that follow an answer */}
               {m.role === 'ai' && m.score !== undefined && (
                 <div className="flex items-center gap-2 px-1">

@@ -86,7 +86,7 @@ router.post('/', auth, requireRole('admin', 'recruiter'), async (req, res) => {
     res.status(201).json({
       interview,
       accessToken,
-      interviewLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/interview/${accessToken}`,
+      interviewLink: `${(process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0].trim()}/interview/${accessToken}`,
     });
   } catch (err) {
     console.error('Create AI interview error:', err.message);
@@ -144,6 +144,7 @@ router.post('/:id/answer', answerLimiter, async (req, res) => {
   try {
     const { token, answer } = req.body;
     if (!token || !answer?.trim()) return res.status(400).json({ message: 'Token and answer are required' });
+    if (answer.trim().length < 5) return res.status(400).json({ message: 'Please provide a more detailed answer.' });
     if (answer.length > 5000) return res.status(400).json({ message: 'Answer too long (max 5000 chars)' });
     if (!isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid ID' });
 
@@ -151,21 +152,27 @@ router.post('/:id/answer', answerLimiter, async (req, res) => {
     if (!interview) return res.status(403).json({ message: 'Invalid access token' });
     if (interview.status !== 'in_progress') return res.status(400).json({ message: 'Interview is not active' });
 
-    // Get the last AI question from messages
+    // Extract the clean question text from the last AI message
+    // Strip "**Question X/Y:**" prefix so AI evaluates the actual question
     const lastAIMsg = [...interview.messages].reverse().find(m => m.role === 'ai');
-    const questionText = lastAIMsg?.content || '';
+    let questionText = lastAIMsg?.content || '';
+    // Extract just the question part after "**Question X/Y:**"
+    const qMatch = questionText.match(/\*\*Question \d+\/\d+:\*\*\s*([\s\S]+)$/);
+    if (qMatch) questionText = qMatch[1].trim();
 
     // Add candidate answer
     interview.messages.push({ role: 'candidate', content: answer.trim() });
 
-    // Count answered questions
+    // Count answered questions (AFTER pushing the answer)
     const answeredCount = interview.messages.filter(m => m.role === 'candidate').length;
     const isLastQuestion = answeredCount >= interview.totalQuestions;
 
     // AI evaluates the answer
-    let evaluation = { score: 5, feedback: 'Good answer.', followUp: '', flags: [] };
+    let evaluation = { score: 6, feedback: 'Thank you for your answer.', followUp: '', flags: [] };
     try {
-      evaluation = await evaluateAnswer(questionText, answer, interview.jobTitle);
+      evaluation = await evaluateAnswer(questionText, answer.trim(), interview.jobTitle);
+      // Clamp score to valid range
+      evaluation.score = Math.max(0, Math.min(10, Number(evaluation.score) || 6));
     } catch (err) {
       console.error('Evaluate answer error:', err.message);
     }
@@ -175,14 +182,16 @@ router.post('/:id/answer', answerLimiter, async (req, res) => {
       const lastMsg = interview.messages[interview.messages.length - 1];
       lastMsg.flagged = true;
       lastMsg.flags = evaluation.flags;
-      interview.monitoring.copyPasteCount += evaluation.flags.includes('copied_response') ? 1 : 0;
+      if (evaluation.flags.includes('copied_response')) {
+        interview.monitoring.copyPasteCount += 1;
+      }
     }
 
     let nextMessage = '';
 
     if (isLastQuestion) {
-      // Interview complete
-      nextMessage = `Thank you, ${interview.candidateName || 'candidate'}! You've completed all ${interview.totalQuestions} questions for the ${interview.jobTitle} position.\n\nYour responses have been recorded. The hiring team will review your AI-generated report and get back to you within 2-3 business days. Good luck! 🎉`;
+      // Interview complete — build closing message
+      nextMessage = `Thank you, ${interview.candidateName || 'candidate'}! You've completed all ${interview.totalQuestions} questions for the **${interview.jobTitle}** position.\n\nYour responses have been recorded and an AI report is being generated. The hiring team will review your performance and get back to you within 2-3 business days. Good luck! 🎉`;
       interview.status = 'completed';
       interview.completedAt = new Date();
       interview.duration = Math.round((Date.now() - new Date(interview.startedAt).getTime()) / 60000);
@@ -191,18 +200,28 @@ router.post('/:id/answer', answerLimiter, async (req, res) => {
       generateInterviewReport(interview.messages, interview.jobTitle, interview.candidateName || 'Candidate')
         .then(report => AIInterview.findByIdAndUpdate(interview._id, { report }))
         .catch(err => console.error('Report generation error:', err.message));
+
     } else {
-      // Get next question from cache
+      // Get next question — answeredCount is 1-indexed, questions array is 0-indexed
+      // answeredCount = 1 means we just answered Q1, so next is questions[1] (Q2)
       let nextQuestion = '';
       try {
         const questions = JSON.parse(interview._questionsCache || '[]');
-        const nextQ = questions[answeredCount]; // 0-indexed, answeredCount is now the next index
+        const nextQ = questions[answeredCount]; // answeredCount already incremented, so this is correct
         nextQuestion = nextQ?.question || '';
-      } catch {}
+      } catch (e) {
+        console.error('Questions cache parse error:', e.message);
+      }
 
-      // Build next message with feedback + next question
-      const feedbackLine = evaluation.feedback ? `${evaluation.feedback} ` : '';
-      nextMessage = `${feedbackLine}\n\n**Question ${answeredCount + 1}/${interview.totalQuestions}:** ${nextQuestion || 'Please continue with the next question.'}`;
+      if (!nextQuestion) {
+        nextQuestion = 'Please tell me more about your experience and what makes you a strong candidate for this role.';
+      }
+
+      // Build next message: brief feedback + next question
+      const feedbackLine = evaluation.feedback ? evaluation.feedback.trim() : '';
+      nextMessage = feedbackLine
+        ? `${feedbackLine}\n\n**Question ${answeredCount + 1}/${interview.totalQuestions}:** ${nextQuestion}`
+        : `**Question ${answeredCount + 1}/${interview.totalQuestions}:** ${nextQuestion}`;
     }
 
     interview.messages.push({ role: 'ai', content: nextMessage });

@@ -18,8 +18,8 @@ router.get('/my', auth, requireRole('client'), async (req, res) => {
         clientId: req.user._id,
         plan: 'basic',
         status: 'trial',
-        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
-        currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        currentPeriodEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
     }
     const plan = PLANS[sub.plan];

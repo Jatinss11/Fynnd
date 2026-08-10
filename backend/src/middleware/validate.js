@@ -16,10 +16,16 @@ function isValidEmail(email) {
 }
 
 /**
- * Validate password strength
+ * Validate password strength — min 8 chars, at least one uppercase, one lowercase, one digit
  */
 function isStrongPassword(password) {
-  return typeof password === 'string' && password.length >= 8;
+  return (
+    typeof password === 'string' &&
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
 }
 
 /**

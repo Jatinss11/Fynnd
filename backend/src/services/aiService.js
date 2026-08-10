@@ -1,43 +1,83 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Key rotation — tries each key in order on quota errors
+const API_KEYS = [
+  process.env.GEMINI_API_KEY,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+].filter(Boolean);
 
-const MODEL = 'gemini-2.5-flash-lite';
+const MODEL = 'gemini-1.5-flash'; // Best free-tier model
 
 /**
- * Safe text generation — returns null on failure instead of throwing
+ * Get a Gemini model instance, rotating keys on quota errors
  */
-async function ask(prompt) {
-  if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
-  try {
-    const model = genAI.getGenerativeModel({ model: MODEL });
-    const result = await model.generateContent(prompt);
-    return result.response.text();
-  } catch (err) {
-    console.error('Gemini ask error:', err.message);
-    throw new Error(`AI service error: ${err.message}`);
+async function getModel(jsonMode = false) {
+  for (const key of API_KEYS) {
+    try {
+      const genAI = new GoogleGenerativeAI(key);
+      const config = jsonMode ? { generationConfig: { responseMimeType: 'application/json' } } : {};
+      const model = genAI.getGenerativeModel({ model: MODEL, ...config });
+      // Quick validation — return model with key info
+      return { model, key };
+    } catch (err) {
+      console.warn(`Key ${key?.slice(0, 15)}... failed:`, err.message);
+    }
   }
+  throw new Error('No valid Gemini API key available');
 }
 
 /**
- * Safe JSON generation — retries once on parse failure
+ * Safe text generation with key rotation
+ */
+async function ask(prompt) {
+  if (!API_KEYS.length) throw new Error('GEMINI_API_KEY not configured');
+  
+  for (const key of API_KEYS) {
+    try {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel({ model: MODEL });
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (err) {
+      if (err.message?.includes('429') || err.message?.includes('quota') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+        console.warn(`Key ${key?.slice(0, 15)}... quota exceeded, trying next key...`);
+        continue;
+      }
+      console.error('Gemini ask error:', err.message);
+      throw new Error(`AI service error: ${err.message}`);
+    }
+  }
+  throw new Error('All Gemini API keys have exceeded their quota. Please try again later or add a new API key.');
+}
+
+/**
+ * Safe JSON generation with key rotation
  */
 async function askJSON(prompt) {
-  if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
-  try {
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      generationConfig: { responseMimeType: 'application/json' },
-    });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    // Strip markdown code fences if present
-    const clean = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-    return JSON.parse(clean);
-  } catch (err) {
-    console.error('Gemini askJSON error:', err.message);
-    throw new Error(`AI service error: ${err.message}`);
+  if (!API_KEYS.length) throw new Error('GEMINI_API_KEY not configured');
+  
+  for (const key of API_KEYS) {
+    try {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel({
+        model: MODEL,
+        generationConfig: { responseMimeType: 'application/json' },
+      });
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      const clean = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+      return JSON.parse(clean);
+    } catch (err) {
+      if (err.message?.includes('429') || err.message?.includes('quota') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+        console.warn(`Key ${key?.slice(0, 15)}... quota exceeded, trying next key...`);
+        continue;
+      }
+      console.error('Gemini askJSON error:', err.message);
+      throw new Error(`AI service error: ${err.message}`);
+    }
   }
+  throw new Error('All Gemini API keys have exceeded their quota. Please try again later or add a new API key at https://aistudio.google.com/app/apikey');
 }
 
 async function parseResume(resumeText) {
@@ -153,42 +193,53 @@ Return the complete CV as plain text, ready to copy.`;
 
 async function generateInterviewQuestions(jobTitle, jobDescription, skills, round = 1) {
   const roundContext = {
-    1: 'technical screening - focus on core skills and fundamentals',
-    2: 'deep technical round - advanced concepts, system design, problem solving',
-    3: 'HR round - behavioural, cultural fit, career goals, salary discussion',
+    1: 'technical screening - focus on core skills, fundamentals, and past experience',
+    2: 'deep technical round - advanced concepts, system design, architecture, problem solving',
+    3: 'HR round - behavioural questions, cultural fit, career goals, motivation',
   };
-  const prompt = `Generate 8 interview questions for a ${roundContext[round] || 'technical'} interview.
-Job: ${jobTitle}
-Key Skills: ${(skills || []).join(', ')}
-Job Description: ${(jobDescription || '').slice(0, 500)}
+  const prompt = `You are an expert interviewer. Generate exactly 5 interview questions for a ${roundContext[round] || 'technical'} interview.
 
-Return ONLY valid JSON:
+Job Title: ${jobTitle}
+Key Skills: ${(skills || []).slice(0, 10).join(', ')}
+Job Description: ${(jobDescription || '').slice(0, 400)}
+
+Return ONLY valid JSON with no extra text:
 {
   "questions": [
-    { "id": 1, "question": "", "type": "technical", "expectedDuration": 120, "followUp": "" }
+    { "id": 1, "question": "Tell me about yourself and your experience with ${(skills || ['the required technologies'])[0]}.", "type": "behavioural" },
+    { "id": 2, "question": "Describe a challenging project you worked on. What was your role and what did you learn?", "type": "situational" },
+    { "id": 3, "question": "How do you approach debugging a complex issue in production?", "type": "technical" },
+    { "id": 4, "question": "Where do you see yourself in 3 years and how does this role fit your goals?", "type": "behavioural" },
+    { "id": 5, "question": "Do you have any questions for us about the role or the team?", "type": "closing" }
   ],
-  "openingMessage": "",
-  "closingMessage": ""
-}`;
+  "openingMessage": "Hello! I'm your AI interviewer for the ${jobTitle} position. I'll ask you 5 questions. Take your time and answer thoroughly. Let's begin!",
+  "closingMessage": "Thank you for completing the interview. Your responses have been recorded."
+}
+
+Make questions specific to the job title and skills. Each question should be clear and answerable in 2-3 minutes.`;
   return askJSON(prompt);
 }
 
 async function evaluateAnswer(question, answer, jobTitle) {
-  const prompt = `Evaluate this interview answer for a ${jobTitle} position.
-Question: ${question}
-Answer: ${(answer || '').slice(0, 1000)}
+  const prompt = `You are an expert interviewer evaluating a candidate's answer for a ${jobTitle} position.
 
-Return ONLY valid JSON:
+Question asked: "${question.slice(0, 500)}"
+Candidate's answer: "${(answer || '').slice(0, 1000)}"
+
+Evaluate the answer and return ONLY valid JSON with no extra text:
 {
-  "score": 5,
-  "feedback": "",
+  "score": 7,
+  "feedback": "Good explanation of the concept. Could have included more specific examples.",
   "followUp": "",
   "flags": []
 }
-- score: 0-10
-- feedback: brief evaluation (1-2 sentences)
-- followUp: follow-up question or ""
-- flags: ["vague_answer"] or []`;
+
+Rules:
+- score: integer 0-10 (0=no answer, 5=average, 8=good, 10=excellent)
+- feedback: 1-2 sentences, constructive and specific
+- followUp: optional follow-up question string, or empty string ""
+- flags: array, use ["vague_answer"] if answer is too short/vague, ["off_topic"] if irrelevant, or []
+- Be fair and encouraging in feedback tone`;
   return askJSON(prompt);
 }
 

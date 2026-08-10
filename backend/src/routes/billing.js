@@ -321,4 +321,57 @@ router.get('/all', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
+// POST /api/billing/admin/set-plan — admin manually sets a client's plan
+router.post('/admin/set-plan', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { clientId, plan, months = 1 } = req.body;
+    if (!PLANS[plan]) return res.status(400).json({ message: 'Invalid plan' });
+    if (!clientId) return res.status(400).json({ message: 'clientId required' });
+
+    const periodEnd = new Date();
+    periodEnd.setMonth(periodEnd.getMonth() + Number(months));
+
+    const sub = await Subscription.findOneAndUpdate(
+      { clientId },
+      {
+        plan, status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: periodEnd,
+        'usage.jobPostings': 0, 'usage.aiMatches': 0, 'usage.candidateViews': 0,
+        'usage.resumeDownloads': 0, 'usage.aiInterviews': 0, 'usage.atsAnalysis': 0,
+        $push: { invoices: { amount: PLANS[plan].price * months, plan, paidAt: new Date(), invoiceId: `INV-ADMIN-${Date.now()}`, paymentId: `admin_${Date.now()}` } },
+      },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, subscription: sub });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/billing/upgrade — direct upgrade (dev/admin use, bypasses payment)
+router.post('/upgrade', auth, requireRole('client'), async (req, res) => {
+  try {
+    const { plan } = req.body;
+    if (!PLANS[plan]) return res.status(400).json({ message: 'Invalid plan' });
+    const periodEnd = new Date();
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
+    const sub = await Subscription.findOneAndUpdate(
+      { clientId: req.user._id },
+      {
+        plan, status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: periodEnd,
+        'usage.jobPostings': 0, 'usage.aiMatches': 0, 'usage.candidateViews': 0,
+        'usage.resumeDownloads': 0, 'usage.aiInterviews': 0, 'usage.atsAnalysis': 0,
+        $push: { invoices: { amount: PLANS[plan].price, plan, paidAt: new Date(), invoiceId: `INV-${Date.now()}`, paymentId: `manual_${Date.now()}` } },
+      },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, subscription: sub, message: `Upgraded to ${PLANS[plan].name} plan!` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

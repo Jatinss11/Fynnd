@@ -45,9 +45,9 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Priya Sharma', role: 'HR Head, Razorpay', text: 'Fynnd cut our time-to-hire from 45 days to 8 days. The AI matching is incredibly accurate for tech roles.', avatar: 'P' },
-  { name: 'Rahul Mehta', role: 'Talent Acquisition, Zomato', text: 'The AI interview feature is a game changer. We screen 10x more candidates without extra effort.', avatar: 'R' },
-  { name: 'Ananya Singh', role: 'Founder, TechStartup', text: 'As a startup, we can\'t afford a full HR team. Fynnd gives us enterprise-level hiring at startup prices.', avatar: 'A' },
+  { name: 'Sarah Mitchell', role: 'VP of Talent, Stripe', text: 'Fynnd cut our time-to-hire from 45 days to 8 days. The AI matching is incredibly accurate for tech roles.', avatar: 'S' },
+  { name: 'James Okafor', role: 'Head of Recruiting, Shopify', text: 'The AI interview feature is a game changer. We screen 10x more candidates without extra effort.', avatar: 'J' },
+  { name: 'Lena Müller', role: 'Founder, TechStartup Berlin', text: 'As a startup, we can\'t afford a full HR team. Fynnd gives us enterprise-level hiring at startup prices.', avatar: 'L' },
 ];
 
 export default function HomePage() {
@@ -91,14 +91,14 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-fynnd-900/40 via-transparent to-transparent" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
           <div className="inline-flex items-center gap-2 bg-fynnd-900/60 border border-fynnd-500/30 text-fynnd-300 text-sm px-4 py-1.5 rounded-full mb-6">
-            <Zap size={13} /> India's #1 AI Recruitment Platform
+            <Zap size={13} /> The World's Most Trusted AI Recruitment Platform
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6">
             Hire the best talent<br />
             <span className="bg-gradient-to-r from-fynnd-400 to-blue-400 bg-clip-text text-transparent">10x faster with AI</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-            AI-powered candidate matching, automated interviews, ATS scoring, and smart pipelines — all in one platform built for Indian companies.
+            AI-powered candidate matching, automated interviews, ATS scoring, and smart pipelines — all in one platform trusted by companies worldwide.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/login" className="btn-primary px-8 py-3.5 text-base flex items-center gap-2">
@@ -108,7 +108,7 @@ export default function HomePage() {
               <Play size={15} /> Candidate Portal
             </Link>
           </div>
-          <p className="text-gray-500 text-sm mt-4">14-day free trial · No credit card required</p>
+          <p className="text-gray-500 text-sm mt-4">7-day free trial · No credit card required</p>
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 max-w-3xl mx-auto">
@@ -175,7 +175,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-4xl font-bold mb-4">Simple, transparent pricing</h2>
-            <p className="text-gray-500 text-lg">Start free for 14 days. No credit card required.</p>
+            <p className="text-gray-500 text-lg">Start free for 7 days. No credit card required.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {PLANS.map((plan) => {
@@ -229,7 +229,7 @@ export default function HomePage() {
       <section id="testimonials" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <h2 className="text-4xl font-bold mb-4">Trusted by India's top companies</h2>
+            <h2 className="text-4xl font-bold mb-4">Trusted by the world's best companies</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map(({ name, role, text, avatar }) => (
@@ -301,14 +301,14 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-4">Ready to transform your hiring?</h2>
-          <p className="text-gray-500 text-lg mb-8">Join 500+ companies using Fynnd to hire faster with AI. Start your free 14-day trial today.</p>
+          <p className="text-gray-500 text-lg mb-8">Join 500+ companies worldwide using Fynnd to hire faster with AI. Start your free 7-day trial today.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/login" className="btn-primary px-10 py-3.5 text-base flex items-center gap-2">
               Start Free Trial <ArrowRight size={18} />
             </Link>
             <Link href="/pricing" className="btn-secondary px-8 py-3.5 text-base">View Pricing</Link>
           </div>
-          <p className="text-gray-400 text-sm mt-4">No credit card · 14-day trial · Cancel anytime</p>
+          <p className="text-gray-400 text-sm mt-4">No credit card · 7-day trial · Cancel anytime</p>
         </div>
       </section>
 
@@ -323,8 +323,8 @@ export default function HomePage() {
                 </div>
                 <span className="font-bold text-white">fynnd</span>
               </div>
-              <p className="text-sm text-gray-500 mb-3">AI-powered recruitment platform for India.</p>
-              <p className="text-xs text-gray-600">by Staffinger Solutions LLP, Noida</p>
+              <p className="text-sm text-gray-500 mb-3">The world's most trusted AI recruitment platform.</p>
+              <p className="text-xs text-gray-600">by Staffinger Solutions</p>
             </div>
             <div>
               <p className="font-semibold text-white text-sm mb-3">Product</p>
@@ -347,14 +347,14 @@ export default function HomePage() {
             <div>
               <p className="font-semibold text-white text-sm mb-3">Contact</p>
               <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2"><Mail size={13} /> sales@fynnd.in</li>
-                <li className="flex items-center gap-2"><Phone size={13} /> +91-120-FYNND</li>
-                <li className="flex items-center gap-2"><MapPin size={13} /> Noida, Uttar Pradesh</li>
+                <li className="flex items-center gap-2"><Mail size={13} /> sales@fynnd.com</li>
+                <li className="flex items-center gap-2"><Phone size={13} /> +1 (800) FYNND-AI</li>
+                <li className="flex items-center gap-2"><MapPin size={13} /> Global · Remote-first</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
-            <p>© 2024 Staffinger Solutions LLP · Noida, India · GST: 09XXXXX1234X1ZX</p>
+            <p>© 2024 Staffinger Solutions · Global</p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-gray-400">Privacy Policy</a>
               <a href="#" className="hover:text-gray-400">Terms of Service</a>

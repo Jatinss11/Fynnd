@@ -69,6 +69,8 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/ats',           require('./routes/ats'));
 app.use('/api/ai-interviews', require('./routes/aiInterview'));
 app.use('/api/billing',       require('./routes/billing'));
+app.use('/api/hrms',          require('./routes/hrms'));
+app.use('/api/jobboard',      require('./routes/jobboard'));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (_, res) => res.json({ status: 'ok', app: 'Fynnd', version: '1.0.0', timestamp: new Date().toISOString() }));

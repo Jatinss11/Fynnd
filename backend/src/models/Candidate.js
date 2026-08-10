@@ -36,9 +36,9 @@ const candidateSchema = new mongoose.Schema({
   workExperience:  [workExpSchema],
   education:       [educationSchema],
 
-  // Indian market specifics
-  currentSalary:   { type: Number }, // in LPA (Lakhs Per Annum)
-  expectedSalary:  { type: Number }, // in LPA
+  // Salary (annual, in thousands USD or local currency)
+  currentSalary:   { type: Number }, // e.g. 120 = $120K
+  expectedSalary:  { type: Number }, // e.g. 150 = $150K
   noticePeriod:    { type: String, enum: ['Immediate', '15 days', '30 days', '45 days', '60 days', '90 days', 'Serving notice'] },
   preferredLocations: [String],
   willingToRelocate: { type: Boolean, default: false },

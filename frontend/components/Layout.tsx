@@ -8,7 +8,8 @@ import api from '@/lib/api';
 import {
   LayoutDashboard, Users, Briefcase, GitBranch, BarChart2,
   Settings, LogOut, Menu, X, Bell, Search, ChevronDown,
-  Calendar, UserCog, Zap, Shield, Bot, CreditCard
+  Calendar, UserCog, Zap, Shield, Bot, CreditCard,
+  Building2, Clock, DollarSign, Star, Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn, getInitials } from '@/lib/utils';
@@ -16,16 +17,26 @@ import { usePlan } from '@/lib/usePlan';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { href: '/dashboard',     label: 'Dashboard',     icon: LayoutDashboard, roles: ['admin', 'recruiter', 'client'] },
-  { href: '/candidates',    label: 'Candidates',    icon: Users,           roles: ['admin', 'recruiter'] },
-  { href: '/jobs',          label: 'Jobs',           icon: Briefcase,       roles: ['admin', 'recruiter', 'client'] },
-  { href: '/pipeline',      label: 'Pipeline',       icon: GitBranch,       roles: ['admin', 'recruiter', 'client'] },
-  { href: '/interviews',    label: 'Interviews',     icon: Calendar,        roles: ['admin', 'recruiter', 'client'] },
-  { href: '/ai-interviews', label: 'AI Interviews',  icon: Bot,             roles: ['admin', 'recruiter'] },
-  { href: '/ats',           label: 'ATS Analyzer',   icon: Shield,          roles: ['admin', 'recruiter'] },
-  { href: '/analytics',     label: 'Analytics',      icon: BarChart2,       roles: ['admin'] },
-  { href: '/team',          label: 'Team',           icon: UserCog,         roles: ['admin'] },
-  { href: '/billing',       label: 'Billing & Plans',icon: CreditCard,      roles: ['client'] },
+  // ── Recruitment ──
+  { href: '/dashboard',     label: 'Dashboard',     icon: LayoutDashboard, roles: ['admin', 'recruiter', 'client'], group: 'Recruitment' },
+  { href: '/candidates',    label: 'Candidates',    icon: Users,           roles: ['admin', 'recruiter'],           group: 'Recruitment' },
+  { href: '/jobs',          label: 'Jobs',           icon: Briefcase,       roles: ['admin', 'recruiter', 'client'], group: 'Recruitment' },
+  { href: '/pipeline',      label: 'Pipeline',       icon: GitBranch,       roles: ['admin', 'recruiter', 'client'], group: 'Recruitment' },
+  { href: '/interviews',    label: 'Interviews',     icon: Calendar,        roles: ['admin', 'recruiter', 'client'], group: 'Recruitment' },
+  { href: '/ai-interviews', label: 'AI Interviews',  icon: Bot,             roles: ['admin', 'recruiter'],           group: 'Recruitment' },
+  { href: '/ats',           label: 'ATS Analyzer',   icon: Shield,          roles: ['admin', 'recruiter'],           group: 'Recruitment' },
+  // ── HRMS ──
+  { href: '/hrms',          label: 'HR Dashboard',   icon: Building2,       roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/employees',label: 'Employees',      icon: Users,           roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/attendance',label: 'Attendance',    icon: Clock,           roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/leaves',   label: 'Leave Manager',  icon: Calendar,        roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/payroll',  label: 'Payroll',        icon: DollarSign,      roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/reviews',  label: 'Performance',    icon: Star,            roles: ['admin', 'client'],              group: 'HRMS' },
+  { href: '/hrms/jobboard', label: 'Job Board',      icon: Globe,           roles: ['admin', 'client'],              group: 'HRMS' },
+  // ── Admin ──
+  { href: '/analytics',     label: 'Analytics',      icon: BarChart2,       roles: ['admin'],                        group: 'Admin' },
+  { href: '/team',          label: 'Team',           icon: UserCog,         roles: ['admin'],                        group: 'Admin' },
+  { href: '/billing',       label: 'Billing & Plans',icon: CreditCard,      roles: ['client'],                       group: 'Admin' },
 ];
 
 const planBadgeClass: Record<string, string> = {
@@ -89,20 +100,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {filtered.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'));
-            return (
-              <Link key={href} href={href}
+          {filtered.reduce((acc, item, idx, arr) => {
+            const prevGroup = idx > 0 ? arr[idx - 1].group : null;
+            if (item.group !== prevGroup) {
+              acc.push(
+                <div key={`group-${item.group}`} className="px-3 pt-4 pb-1 text-[10px] font-semibold text-gray-600 uppercase tracking-widest">
+                  {item.group}
+                </div>
+              );
+            }
+            const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+            const Icon = item.icon;
+            acc.push(
+              <Link key={item.href} href={item.href}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                   active ? 'bg-fynnd-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 )}
                 onClick={() => setSidebarOpen(false)}>
                 <Icon size={17} />
-                {label}
+                {item.label}
               </Link>
             );
-          })}
+            return acc;
+          }, [] as React.ReactNode[])}
         </nav>
 
         {/* User section */}

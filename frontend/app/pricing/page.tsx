@@ -130,7 +130,7 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-fynnd-900/50 border border-fynnd-500/30 text-fynnd-300 text-sm px-4 py-1.5 rounded-full mb-4">
-            <Zap size={13} /> AI-Powered Recruitment Platform
+            <Zap size={13} /> The World's Most Trusted AI Recruitment Platform
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             Simple, Transparent Pricing
@@ -262,10 +262,10 @@ export default function PricingPage() {
           {[
             { q: 'Is there a free trial?', a: 'Yes! All plans come with a 14-day free trial. No credit card required to start.' },
             { q: 'Can I upgrade or downgrade anytime?', a: 'Absolutely. You can change your plan at any time. Upgrades take effect immediately.' },
-            { q: 'What payment methods do you accept?', a: 'We accept all major credit/debit cards, UPI, net banking, and NEFT/RTGS via Razorpay.' },
-            { q: 'Is GST included in the pricing?', a: 'Prices shown are exclusive of GST. 18% GST will be added at checkout. GST invoices are provided.' },
+            { q: 'What payment methods do you accept?', a: 'We accept all major credit/debit cards, PayPal, bank transfers, and wire payments.' },
+            { q: 'Is tax included in the pricing?', a: 'Prices shown are exclusive of applicable taxes. Tax invoices are provided for all payments.' },
             { q: 'What happens when I hit my limit?', a: 'You\'ll be notified and prompted to upgrade. Existing data is never deleted.' },
-            { q: 'Do you offer custom enterprise plans?', a: 'Yes! Contact us at sales@fynnd.in or call +91-120-FYNND for custom pricing.' },
+            { q: 'Do you offer custom enterprise plans?', a: 'Yes! Contact us at sales@fynnd.com for custom pricing and enterprise agreements.' },
           ].map(({ q, a }, i) => (
             <div key={i} className="bg-gray-900 border border-white/10 rounded-xl p-5">
               <p className="font-semibold text-white mb-2">{q}</p>
@@ -277,16 +277,16 @@ export default function PricingPage() {
         {/* CTA */}
         <div className="bg-gradient-to-r from-fynnd-900 to-fynnd-800 border border-fynnd-500/30 rounded-2xl p-10 text-center">
           <h2 className="text-3xl font-bold mb-3">Ready to hire smarter?</h2>
-          <p className="text-gray-300 mb-6">Join 500+ companies using Fynnd to find the best talent in India</p>
+          <p className="text-gray-300 mb-6">Join 500+ companies worldwide using Fynnd to find the best talent</p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button onClick={() => handleSelect('premium')} className="btn-primary px-8 py-3 text-base">
               Start Free Trial <ArrowRight size={16} />
             </button>
-            <a href="tel:+911204FYNND" className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
+            <a href="mailto:sales@fynnd.com" className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
               <Phone size={15} /> Talk to Sales
             </a>
           </div>
-          <p className="text-xs text-gray-500 mt-4">by Staffinger Solutions LLP, Noida · GST: 09XXXXX1234X1ZX</p>
+          <p className="text-xs text-gray-500 mt-4">by Staffinger Solutions · Global</p>
         </div>
       </div>
     </div>
