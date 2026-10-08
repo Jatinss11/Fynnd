@@ -4,11 +4,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://fynnd-api.onrender.com"
+    "NEXT_PUBLIC_API_URL": "https://fynnd-api.onrender.com/api"
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_API_URL": "https://fynnd-api.onrender.com"
+      "NEXT_PUBLIC_API_URL": "https://fynnd-api.onrender.com/api"
     }
   }
 }
