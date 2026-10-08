@@ -1,13 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import { Zap, CheckCircle, XCircle, Loader } from 'lucide-react';
 import Link from 'next/link';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const params = useSearchParams();
-  const router = useRouter();
   const token = params.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
@@ -38,9 +37,7 @@ export default function VerifyEmailPage() {
             <CheckCircle size={48} className="mx-auto text-emerald-500 mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">Email Verified!</h2>
             <p className="text-gray-500 mb-6">{message}</p>
-            <Link href="/login" className="btn-primary w-full py-2.5 inline-block text-center">
-              Sign In
-            </Link>
+            <Link href="/login" className="btn-primary w-full py-2.5 inline-block text-center">Sign In</Link>
           </>
         )}
         {status === 'error' && (
@@ -48,12 +45,18 @@ export default function VerifyEmailPage() {
             <XCircle size={48} className="mx-auto text-red-500 mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">Verification Failed</h2>
             <p className="text-gray-500 mb-6">{message}</p>
-            <Link href="/login" className="btn-primary w-full py-2.5 inline-block text-center">
-              Back to Login
-            </Link>
+            <Link href="/login" className="btn-primary w-full py-2.5 inline-block text-center">Back to Login</Link>
           </>
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

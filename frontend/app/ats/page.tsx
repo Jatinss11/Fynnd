@@ -211,7 +211,7 @@ export default function ATSPage() {
               <h2 className="section-title">Section Breakdown</h2>
               {report.sections && Object.entries(report.sections).map(([key, val]: any) => (
                 <SectionBar key={key}
-                  label={key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}
+                  label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase())}
                   score={val.score}
                   matched={val.matched}
                   missing={val.missing}
