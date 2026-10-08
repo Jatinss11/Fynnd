@@ -1,14 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { Zap, Eye, EyeOff, ArrowLeft, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useGoogleLogin } from '@react-oauth/google';
 
 const DEMO_ACCOUNTS = [
-  { label: 'Admin', email: 'admin@fynnd.com', password: 'Admin@123', color: 'bg-purple-100 text-purple-700' },
+  { label: 'Admin', email: 'admin@fynnd.in', password: 'Admin@1234', color: 'bg-purple-100 text-purple-700' },
   { label: 'Recruiter', email: 'recruiter@fynnd.com', password: 'Test@123', color: 'bg-blue-100 text-blue-700' },
   { label: 'Client', email: 'client@acme.com', password: 'Test@123', color: 'bg-emerald-100 text-emerald-700' },
 ];
@@ -22,14 +21,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
-  // For new Google users who need to pick a role
-  const [googleCredential, setGoogleCredential] = useState<string | null>(null);
   const [googleRoleMode, setGoogleRoleMode] = useState(false);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
   const [googleRole, setGoogleRole] = useState('client');
+  const [hasGoogle, setHasGoogle] = useState(false);
+
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    setHasGoogle(!!clientId && clientId !== 'your_google_oauth_client_id');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +46,7 @@ export default function LoginPage() {
         : { name: form.name, email: form.email, password: form.password, role: form.role, company: form.company };
       const { data } = await api.post(endpoint, payload);
       if (tab === 'register') {
-        setSuccess(data.message || 'Account created! Please verify your email before signing in.');
+        setSuccess(data.message || 'Account created! You can now sign in.');
         setTab('login');
         setForm(f => ({ ...f, password: '' }));
       } else {
@@ -65,75 +68,25 @@ export default function LoginPage() {
       await api.post('/auth/forgot-password', { email: forgotEmail });
       setForgotSent(true);
     } catch {
-      setForgotSent(true); // always show success to prevent enumeration
+      setForgotSent(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const googleLogin = useGoogleLogin({
-    scope: 'openid email profile',
-    onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
-      setError('');
-      try {
-        const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        }).then(r => r.json());
-
-        if (!userInfo.email) throw new Error('Could not get email from Google');
-
-        const { data } = await api.post('/auth/google-token', {
-          accessToken: tokenResponse.access_token,
-          userInfo,
-        });
-        setAuth(data.user, data.token);
-        router.push('/dashboard');
-      } catch (err: any) {
-        if (err.response?.data?.requiresRole) {
-          setGoogleCredential(tokenResponse.access_token);
-          setGoogleRoleMode(true);
-        } else {
-          setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
-        }
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    onError: (err) => {
-      console.error('Google login error:', err);
-      setError('Google sign-in was cancelled or failed.');
-    },
-  });
-
   const handleGoogleRoleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!googleCredential) return;
-    setGoogleLoading(true);
+    if (!googleToken) return;
+    setLoading(true);
     setError('');
     try {
-      const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${googleCredential}` },
-      }).then(r => r.json());
-
-      if (!userInfo.email) {
-        setError('Google session expired. Please try signing in again.');
-        setGoogleRoleMode(false);
-        setGoogleCredential(null);
-        return;
-      }
-
-      const { data } = await api.post('/auth/google-token', {
-        accessToken: googleCredential,
-        userInfo,
-        role: googleRole,
-      });
+      const { data } = await api.post('/auth/google-token', { accessToken: googleToken, role: googleRole });
       setAuth(data.user, data.token);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to complete sign-up. Please try again.');
     } finally {
-      setGoogleLoading(false);
+      setLoading(false);
     }
   };
 
@@ -204,8 +157,8 @@ export default function LoginPage() {
               </select>
             </div>
             {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
-            <button type="submit" className="btn-primary w-full py-2.5" disabled={googleLoading}>
-              {googleLoading ? 'Setting up...' : 'Continue'}
+            <button type="submit" className="btn-primary w-full py-2.5" disabled={loading}>
+              {loading ? 'Setting up...' : 'Continue'}
             </button>
           </form>
         </div>
@@ -291,28 +244,6 @@ export default function LoginPage() {
                 <span>{success}</span>
               </div>
             )}
-
-            {/* Google Sign-In */}
-            <button
-              type="button"
-              onClick={() => googleLogin()}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-xl transition-colors mb-4 disabled:opacity-60"
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-                <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-              </svg>
-              {googleLoading ? 'Signing in...' : `Continue with Google`}
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200" />
-            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {tab === 'register' && (
